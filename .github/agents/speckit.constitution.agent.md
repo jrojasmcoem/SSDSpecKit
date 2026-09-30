@@ -1,10 +1,17 @@
 ---
-description: Create or update the project constitution from interactive or provided principle inputs.
+description: Crea o actualiza la constitución del proyecto a partir de principios proporcionados o recopilados de forma interactiva.
 handoffs:
-  - label: Build Specification
+  - label: Crear especificación
     agent: speckit.specify
-    prompt: Implement the feature specification based on the updated constitution. I want to build...
+    prompt: Implementa la especificación de la funcionalidad basándote en la constitución actualizada. Quiero construir...
 ---
+
+## Idioma de trabajo (OBLIGATORIO)
+
+- Responde SIEMPRE en español (preguntas, informes, tablas, resúmenes y mensajes de progreso), aunque estas instrucciones estén en inglés.
+- Redacta en español todo el contenido de la constitución (principios, secciones, gobernanza e informe de impacto de sincronización).
+- NO traduzcas los tokens que usan los scripts: `[NEEDS CLARIFICATION: ...]`, `NEEDS CLARIFICATION`, `N/A`, `[P]`, `[USn]`, IDs (`T001`, `FR-001`, `SC-001`, `CHK001`), casillas `- [ ]`/`- [x]`, campos `**Language/Version**`, `**Primary Dependencies**`, `**Storage**`, `**Project Type**` y los encabezados `## Clarifications`, `### Session YYYY-MM-DD`, `## Phase N: Convergence`.
+- Nombres de código, comandos y rutas se mantienen tal cual.
 
 ## User Input
 
@@ -36,6 +43,7 @@ and commands read the constitution at runtime and are not modified here.
 ## Pre-Execution Checks
 
 **Check for extension hooks (before constitution update)**:
+
 - Check if `.specify/extensions.yml` exists in the project root.
 - If it exists, read it and look for entries under the `hooks.before_constitution` key
 - If the YAML cannot be parsed or is invalid, do not skip silently: tell the user that `.specify/extensions.yml` could not be read (include the parser error) and that no hooks were checked, including any mandatory (`optional: false`) hooks registered there, then continue normally
@@ -45,6 +53,7 @@ and commands read the constitution at runtime and are not modified here.
   - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
 - For each executable hook, output the following based on its `optional` flag:
   - **Optional hook** (`optional: true`):
+
     ```
     ## Extension Hooks
 
@@ -55,7 +64,9 @@ and commands read the constitution at runtime and are not modified here.
     Prompt: {prompt}
     To execute: `/{command}`
     ```
+
   - **Mandatory hook** (`optional: false`):
+
     ```
     ## Extension Hooks
 
@@ -65,7 +76,9 @@ and commands read the constitution at runtime and are not modified here.
 
     Wait for the result of the hook command before proceeding to the Outline.
     ```
+
     After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
+
 - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
 
 ## Outline
@@ -87,7 +100,7 @@ Follow this execution flow:
    - If it does not exist, use the resolved template as the initial document.
    - Do not write back to any versioned template layer.
    - Identify every placeholder token of the form `[ALL_CAPS_IDENTIFIER]`.
-   **IMPORTANT**: The user might require less or more principles than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly.
+     **IMPORTANT**: The user might require less or more principles than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly.
 
 2. Collect/derive values for placeholders:
    - If user input (conversation) supplies a value, use it.
@@ -145,6 +158,7 @@ Write only `.specify/memory/constitution.md`; do not create or modify template s
 
 **Check for extension hooks (after constitution update)**:
 Check if `.specify/extensions.yml` exists in the project root.
+
 - If it exists, read it and look for entries under the `hooks.after_constitution` key
 - If the YAML cannot be parsed or is invalid, do not skip silently: tell the user that `.specify/extensions.yml` could not be read (include the parser error) and that no hooks were checked, including any mandatory (`optional: false`) hooks registered there, then continue normally
 - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
@@ -153,6 +167,7 @@ Check if `.specify/extensions.yml` exists in the project root.
   - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
 - For each executable hook, output the following based on its `optional` flag:
   - **Optional hook** (`optional: true`):
+
     ```
     ## Extension Hooks
 
@@ -163,7 +178,9 @@ Check if `.specify/extensions.yml` exists in the project root.
     Prompt: {prompt}
     To execute: `/{command}`
     ```
+
   - **Mandatory hook** (`optional: false`):
+
     ```
     ## Extension Hooks
 
@@ -171,5 +188,7 @@ Check if `.specify/extensions.yml` exists in the project root.
     Executing: `/{command}`
     EXECUTE_COMMAND: {command}
     ```
+
     After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
+
 - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
