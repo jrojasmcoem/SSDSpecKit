@@ -93,6 +93,9 @@ function Get-FeatureDir {
 }
 
 function Get-FeaturePathsEnv {
+    # Accepted for compatibility with newer scripts (setup-tasks.ps1); unused here.
+    param([switch]$ReturnNullOnError)
+
     $repoRoot = Get-RepoRoot
     $currentBranch = Get-CurrentBranch
     $hasGit = Test-HasGit
@@ -133,5 +136,50 @@ function Test-DirHasFiles {
         Write-Output "  ✗ $Description"
         return $false
     }
+}
+
+# Resolve a template path: overrides > presets > extensions > core (.specify/templates).
+function Resolve-Template {
+    param(
+        [Parameter(Mandatory = $true)][string]$TemplateName,
+        [Parameter(Mandatory = $true)][string]$RepoRoot
+    )
+
+    if ($TemplateName -cnotmatch '^[a-z0-9-]+$') { return $null }
+
+    $base = Join-Path $RepoRoot '.specify/templates'
+    $candidates = @(Join-Path $base "overrides/$TemplateName.md")
+
+    foreach ($layer in @('.specify/presets', '.specify/extensions')) {
+        $layerDir = Join-Path $RepoRoot $layer
+        if (Test-Path -LiteralPath $layerDir -PathType Container) {
+            Get-ChildItem -LiteralPath $layerDir -Directory -ErrorAction SilentlyContinue |
+                Where-Object { $_.Name -cmatch '^[a-z0-9-]+$' } |
+                Sort-Object Name |
+                ForEach-Object {
+                    $candidates += Join-Path $_.FullName "templates/$TemplateName.md"
+                    $candidates += Join-Path $_.FullName "$TemplateName.md"
+                }
+        }
+    }
+
+    $candidates += Join-Path $base "$TemplateName.md"
+
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
+    }
+    return $null
+}
+
+# Preset composition strategies (prepend/append/wrap) are not supported; the first layer found wins.
+function Resolve-TemplateContent {
+    param(
+        [Parameter(Mandatory = $true)][string]$TemplateName,
+        [Parameter(Mandatory = $true)][string]$RepoRoot
+    )
+
+    $path = Resolve-Template -TemplateName $TemplateName -RepoRoot $RepoRoot
+    if (-not $path) { return $null }
+    return [System.IO.File]::ReadAllText($path, [System.Text.Encoding]::UTF8)
 }
 
