@@ -1,3 +1,27 @@
+# SSDSpecKit
+
+## CSP Atlas: visor interactivo de arquitectura
+
+La aplicación React independiente en `architecture-viewer/` presenta cinco diagramas
+conectados del negocio CSP: arquitectura general, origen de clientes y CSP-Tenants,
+pedidos y aprobaciones, aprovisionamiento y consulta de suscripciones.
+Incluye zoom, desplazamiento, detalles por nodo y modo presentación. No tiene
+backend, formularios CRUD ni conexiones reales al ERP o proveedores.
+
+Requiere Node.js 22.12+ (o 24 LTS) y npm. Desde la raíz del repositorio:
+
+```sh
+cd architecture-viewer
+npm ci
+npm run dev
+```
+
+Abre la dirección local que indica Vite (normalmente `http://localhost:5173`).
+Para compilar: `npm run build`. Para revisar código: `npm run lint`.
+Consulta [las instrucciones del visor](architecture-viewer/README.md) para
+presentación, alcance y validación. La aplicación Blazor original se conserva
+sin modificaciones y no es necesaria para ejecutar el visor.
+
 # ContosoDashboard
 
 The ContosoDashboard application is intended for TRAINING PURPOSES ONLY.
