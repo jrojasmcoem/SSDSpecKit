@@ -3,7 +3,7 @@
 **Rama**: `[###-feature-name]` | **Fecha**: [DATE] | **Spec**: [enlace]
 **Entrada**: Especificación de la funcionalidad en `/specs/[###-feature-name]/spec.md`
 
-**Nota**: Esta plantilla la completa el comando `/speckit.plan`. Consulta `.specify/templates/commands/plan.md` para ver el flujo de ejecución.
+**Nota**: Esta plantilla la completa el comando `/speckit.plan`, disponible en Copilot Chat mediante `.github/prompts/speckit.plan.prompt.md`.
 
 ## Resumen
 
