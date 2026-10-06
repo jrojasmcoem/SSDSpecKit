@@ -36,6 +36,141 @@ The ContosoDashboard repository contains the starter code project for training t
 - The project does NOT implement cloud integration or external service dependencies (local only and offline to maximize training availability).
 - The project demonstrates good coding practices, simplified for a training context, with known and documented limitations.
 
+## Desarrollo guiado por especificaciones (Spec Kit / SDD)
+
+Este repositorio ya incluye [GitHub Spec Kit](https://github.com/github/spec-kit).
+Se conserva y documenta la instalación existente para empezar a mejorar el proyecto
+sin reinicializarlo ni sobrescribir sus especificaciones. Spec Kit es una herramienta
+de desarrollo, no una dependencia de la aplicación.
+
+### Configuración incluida
+
+La opción predeterminada es **GitHub Copilot en VS Code, con comandos `/speckit.*`
+y scripts PowerShell**. PowerShell 7 permite usar los mismos scripts en Windows,
+Linux y macOS; no se añade un segundo conjunto de scripts Bash ni extensiones opcionales.
+
+| Ubicación | Propósito |
+|-----------|-----------|
+| `.github/prompts/` | Entradas de los comandos `/speckit.*` de Copilot Chat. |
+| `.github/agents/` | Agentes de Spec Kit a los que delegan esos comandos. |
+| `.github/copilot-instructions.md` | Instrucciones del repositorio, incluido el idioma español. |
+| `.specify/memory/constitution.md` | Principios y puertas de calidad de ContosoDashboard. |
+| `.specify/templates/` | Plantillas en español para especificación, plan, tareas, checklists, constitución y contexto del agente. |
+| `.specify/scripts/powershell/` | Creación de funcionalidades, comprobación de prerrequisitos, preparación del plan y tareas y actualización del contexto. |
+| `.specify/init-options.json`, `.specify/integration.json`, `.specify/integrations/` | Opciones y manifiestos de la instalación existente (`1.0.14.dev0`, integración `copilot`, scripts `ps`, numeración secuencial). |
+| `.specify/workflows/` | Definición del ciclo SDD de Spec Kit; no es un workflow de GitHub Actions. |
+| `.vscode/settings.json` | Recomendaciones de los comandos del flujo y sus revisiones. |
+| `specs/` | Artefactos versionados de cada funcionalidad. |
+
+Ya existe `specs/001-document-upload-management/spec.md`, en estado **Borrador**,
+con su checklist de requisitos. Es una propuesta, no una garantía de implementación.
+El código actual es ContosoDashboard: el contexto de negocio sobre clientes, ERP,
+CSP-Tenant y pedidos no debe tratarse como funcionalidad implementada. Para incorporarlo,
+crea una nueva especificación y valida su alcance y compatibilidad con la constitución.
+
+### Requisitos locales
+
+- **Git**, **PowerShell 7+** (`pwsh`) y **VS Code con GitHub Copilot** habilitado
+  para tu cuenta. Abre la raíz del repositorio como carpeta de trabajo y usa Copilot Chat.
+- Para trabajar con los archivos y scripts incluidos **no hace falta instalar Specify CLI**.
+  El asistente de IA puede requerir conexión a Internet, aunque la aplicación sea local.
+- Para compilar o ejecutar ContosoDashboard necesitas los requisitos de la aplicación:
+  el SDK compatible con `ContosoDashboard/ContosoDashboard.csproj` (actualmente **.NET 10**)
+  y SQL Server LocalDB para ejecutarla. No son requisitos para redactar especificaciones.
+
+Desde la raíz, puedes comprobar PowerShell y consultar los scripts sin crear archivos:
+
+```powershell
+pwsh --version
+git --version
+pwsh -NoProfile -File .specify/scripts/powershell/create-new-feature.ps1 -Help
+pwsh -NoProfile -File .specify/scripts/powershell/check-prerequisites.ps1 -Help
+```
+
+### Crear una funcionalidad
+
+Parte de `main` actualizado y con el árbol de trabajo limpio. Ejecuta los siguientes
+comandos **en Copilot Chat, uno por uno**, revisando cada resultado antes de continuar;
+no son comandos de terminal:
+
+```text
+/speckit.specify Permitir filtrar las tareas por prioridad, conservando los permisos existentes.
+/speckit.clarify
+/speckit.plan Integrar la mejora en ContosoDashboard con Blazor Server y los servicios existentes, sin nuevas dependencias salvo justificación.
+/speckit.tasks
+/speckit.analyze
+/speckit.implement
+/speckit.converge
+```
+
+1. Revisa primero `.specify/memory/constitution.md`. Usa `/speckit.constitution`
+   únicamente para acordar cambios en los principios, no para regenerarlos en cada iteración.
+2. `/speckit.specify` crea una rama `NNN-nombre` y `specs/NNN-nombre/spec.md`.
+   La numeración es secuencial; `001` ya está utilizado. Describe **qué** necesitas
+   y **por qué**, con escenarios de aceptación y criterios medibles.
+3. `/speckit.clarify` resuelve ambigüedades antes del diseño. No inventes reglas:
+   conserva `[NEEDS CLARIFICATION: ...]` hasta acordarlas.
+4. `/speckit.plan` prepara `plan.md` y los artefactos de diseño que correspondan
+   (`research.md`, `data-model.md`, `quickstart.md`, `contracts/`).
+5. `/speckit.tasks` genera `tasks.md`; `/speckit.analyze` revisa la consistencia
+   entre especificación, plan y tareas antes de implementar. `/speckit.checklist`
+   permite añadir una revisión de calidad de requisitos cuando sea útil.
+6. `/speckit.implement` ejecuta las tareas. Valida los escenarios de aceptación,
+   compila la aplicación si cambió código y ejecuta las pruebas disponibles.
+   `/speckit.converge` identifica trabajo pendiente; repite implementación y
+   convergencia hasta completarlo, revisando los cambios.
+7. Incluye código y artefactos SDD en una PR hacia `main`, con los resultados de
+   validación. La instalación de Spec Kit no crea ni publica una PR automáticamente.
+
+Redacta los artefactos en español, manteniendo nombres de código y tokens que leen los
+scripts: `NEEDS CLARIFICATION`, `N/A`, `[P]`, `[US1]`, `T001`, `FR-001`, `SC-001`,
+`CHK001`, `**Language/Version**:`, `**Primary Dependencies**:`, `**Storage**:` y
+`**Project Type**:`.
+
+### Actualizar una especificación existente
+
+Para continuar una funcionalidad, cambia a su rama `NNN-nombre` y abre su carpeta
+en `specs/`. Edita `spec.md` directamente o pide a Copilot que actualice **ese archivo**;
+no uses una nueva ejecución de `/speckit.specify` para una corrección de la misma funcionalidad.
+Actualiza también los escenarios y criterios afectados, revisa el plan y ajusta las tareas
+sin perder su trazabilidad ni el registro de trabajo completado. Vuelve a ejecutar
+`/speckit.analyze` antes de implementar. Si la mejora es independiente, crea otra funcionalidad.
+
+Los scripts resuelven la carpeta a partir de la rama. Si trabajas desde una rama con
+otro nombre, puedes seleccionar explícitamente una especificación en una sesión PowerShell:
+
+```powershell
+$env:SPECIFY_FEATURE = '001-document-upload-management'
+pwsh -NoProfile -File .specify/scripts/powershell/check-prerequisites.ps1 -PathsOnly -Json
+# Tras disponer de plan.md y tasks.md:
+pwsh -NoProfile -File .specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
+Remove-Item Env:SPECIFY_FEATURE
+```
+
+`SPECIFY_FEATURE` debe coincidir con la carpeta elegida; no crea ni cambia ramas.
+La variable se hereda por los procesos iniciados desde esa terminal, no por un VS Code
+ya abierto. La comprobación de implementación falla intencionadamente si faltan
+`plan.md` o `tasks.md`; el borrador `001` todavía no contiene esos archivos.
+
+### Mantenimiento y solución de problemas
+
+- Versiona `.specify/`, los comandos de Copilot y `specs/`; no versiones secretos,
+  entornos locales ni artefactos de compilación. `.specify/.gitignore` ya excluye
+  el selector local `feature.json` y las configuraciones locales de extensiones.
+- Si no aparecen los comandos, comprueba que abriste la raíz, que Copilot está
+  habilitado y que VS Code permite los archivos de prompts del workspace; recarga la ventana.
+  Usa los comandos con punto (`/speckit.specify`) de esta instalación: otras versiones
+  de Spec Kit pueden usar skills con guion (`/speckit-specify`).
+- Si aparece «Not on a feature branch», usa la rama `NNN-nombre` correcta o
+  `SPECIFY_FEATURE`. Si faltan artefactos, completa plan y tareas antes de implementar.
+- No ejecutes `specify init --here --force` sobre esta instalación: podría reemplazar
+  personalizaciones. Para una actualización deliberada, consulta la
+  [guía oficial](https://github.com/github/spec-kit), elige una versión concreta,
+  sigue sus requisitos de CLI (Python 3.11+ y `uv`), trabaja en una rama con los
+  cambios previos guardados y revisa el diff antes de integrar. Conserva las
+  traducciones, la constitución y las especificaciones. No se instala una CLI global
+  ni se actualiza automáticamente la versión de Spec Kit en esta configuración.
+
 ## 🔒 Security Features (Training Implementation)
 
 This application includes a **mock authentication system** designed for training without external dependencies:
