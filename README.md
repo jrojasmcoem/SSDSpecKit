@@ -38,16 +38,21 @@ The ContosoDashboard repository contains the starter code project for training t
 
 ## Desarrollo guiado por especificaciones (Spec Kit / SDD)
 
-Este repositorio ya incluye [GitHub Spec Kit](https://github.com/github/spec-kit).
-Se conserva y documenta la instalación existente para empezar a mejorar el proyecto
-sin reinicializarlo ni sobrescribir sus especificaciones. Spec Kit es una herramienta
-de desarrollo, no una dependencia de la aplicación.
+Este repositorio usa el [GitHub Spec Kit oficial](https://github.com/github/spec-kit)
+y el flujo de inicialización `specify init my-project --integration copilot`.
+La instalación existente ya contiene sus plantillas, scripts, manifiestos y comandos
+de Copilot; se conservan las traducciones, la constitución y las especificaciones,
+sin crear un proyecto anidado ni sobrescribir el trabajo previo. Spec Kit es una
+herramienta de desarrollo, no una dependencia de la aplicación.
 
 ### Configuración incluida
 
-La opción predeterminada es **GitHub Copilot en VS Code, con comandos `/speckit.*`
-y scripts PowerShell**. PowerShell 7 permite usar los mismos scripts en Windows,
-Linux y macOS; no se añade un segundo conjunto de scripts Bash ni extensiones opcionales.
+La configuración de **este repositorio** es **GitHub Copilot en VS Code, con comandos
+`/speckit.*` y scripts PowerShell**: corresponde al modo oficial `--commands`.
+PowerShell 7 permite usar los mismos scripts en Windows, Linux y macOS; no se añade
+un segundo conjunto de scripts Bash ni extensiones opcionales. Los proyectos nuevos
+inicializados con el CLI `1.1.1` usan skills `/speckit-*` por defecto; ambos modos
+están soportados, pero no se deben mezclar sus invocaciones.
 
 | Ubicación | Propósito |
 |-----------|-----------|
@@ -58,6 +63,7 @@ Linux y macOS; no se añade un segundo conjunto de scripts Bash ni extensiones o
 | `.specify/templates/` | Plantillas en español para especificación, plan, tareas, checklists, constitución y contexto del agente. |
 | `.specify/scripts/powershell/` | Creación de funcionalidades, comprobación de prerrequisitos, preparación del plan y tareas y actualización del contexto. |
 | `.specify/init-options.json`, `.specify/integration.json`, `.specify/integrations/` | Opciones y manifiestos de la instalación existente (`1.0.14.dev0`, integración `copilot`, scripts `ps`, numeración secuencial). |
+| `.specify/requirements.txt` | CLI oficial fijado a la release `v1.1.1`, instalado separadamente de las aplicaciones. |
 | `.specify/workflows/` | Definición del ciclo SDD de Spec Kit; no es un workflow de GitHub Actions. |
 | `.vscode/settings.json` | Recomendaciones de los comandos del flujo y sus revisiones. |
 | `specs/` | Artefactos versionados de cada funcionalidad. |
@@ -86,6 +92,68 @@ git --version
 pwsh -NoProfile -File .specify/scripts/powershell/create-new-feature.ps1 -Help
 pwsh -NoProfile -File .specify/scripts/powershell/check-prerequisites.ps1 -Help
 ```
+
+### Instalar el CLI oficial
+
+Para inicializar proyectos o mantener la integración necesitas **Python 3.11+**,
+Git y [uv](https://github.github.io/spec-kit/install/uv.html).
+La versión del CLI se fija a una release oficial, no a la rama de desarrollo:
+
+```bash
+uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v1.1.1
+specify version
+specify check
+```
+
+Como alternativa sin `uv`, instala el mismo CLI con el archivo versionado,
+en un entorno virtual **fuera del repositorio**:
+
+```bash
+python -m venv ../ssdspeckit-cli
+# Linux/macOS:
+../ssdspeckit-cli/bin/python -m pip install -r .specify/requirements.txt
+../ssdspeckit-cli/bin/specify version
+```
+
+En Windows, usa `..\ssdspeckit-cli\Scripts\python.exe` y
+`..\ssdspeckit-cli\Scripts\specify.exe` en lugar de los ejecutables de `bin/`.
+La versión `1.1.1` corresponde al CLI; los metadatos `1.0.14.dev0` identifican los
+assets conservados de la instalación anterior. Instalar el CLI **no actualiza**
+esos assets ni modifica `specs/`.
+
+### Inicialización oficial y equivalente para este repositorio
+
+Para un proyecto **nuevo**, desde su directorio padre:
+
+```bash
+specify init my-project --integration copilot
+```
+
+`my-project` es un nombre de ejemplo, no una carpeta que deba añadirse a SSDSpecKit.
+Para generar la misma modalidad de Copilot y scripts que utiliza este repositorio:
+
+```bash
+specify init my-project --integration copilot --script ps --integration-options="--commands"
+```
+
+Para un checkout **sin configuración Spec Kit previa**, el equivalente desde su raíz
+es el siguiente; al tratarse de una carpeta con archivos, revisa la confirmación del CLI:
+
+```bash
+specify init --here --integration copilot --script ps --integration-options="--commands"
+```
+
+**No ejecutes esa inicialización sobre este checkout ya configurado.** Usa el flujo
+de mantenimiento de abajo para preservar las personalizaciones. No hace falta
+inicializar cada vez que clonas el repositorio.
+
+La inicialización oficial se comprobó en un directorio temporal con el CLI `1.1.1`,
+Copilot y scripts `ps`, añadiendo `--non-interactive --ignore-agent-tools` para el
+entorno cloud. Generó correctamente la infraestructura y las skills predeterminadas.
+No se reinicializó este repositorio ni se verificó una sesión autenticada de Copilot
+Chat: esa validación requiere VS Code con Copilot habilitado. Los assets básicos
+vienen incluidos en el CLI; instalarlo puede requerir Internet, y omitir la
+comprobación de herramientas del agente no instala ni autentica Copilot.
 
 ### Crear una funcionalidad
 
@@ -159,17 +227,30 @@ ya abierto. La comprobación de implementación falla intencionadamente si falta
   el selector local `feature.json` y las configuraciones locales de extensiones.
 - Si no aparecen los comandos, comprueba que abriste la raíz, que Copilot está
   habilitado y que VS Code permite los archivos de prompts del workspace; recarga la ventana.
-  Usa los comandos con punto (`/speckit.specify`) de esta instalación: otras versiones
-  de Spec Kit pueden usar skills con guion (`/speckit-specify`).
+  Usa los comandos con punto (`/speckit.specify`) de esta instalación; el modo skills
+  de una inicialización nueva usa guion (`/speckit-specify`).
 - Si aparece «Not on a feature branch», usa la rama `NNN-nombre` correcta o
   `SPECIFY_FEATURE`. Si faltan artefactos, completa plan y tareas antes de implementar.
 - No ejecutes `specify init --here --force` sobre esta instalación: podría reemplazar
-  personalizaciones. Para una actualización deliberada, consulta la
-  [guía oficial](https://github.com/github/spec-kit), elige una versión concreta,
-  sigue sus requisitos de CLI (Python 3.11+ y `uv`), trabaja en una rama con los
-  cambios previos guardados y revisa el diff antes de integrar. Conserva las
-  traducciones, la constitución y las especificaciones. No se instala una CLI global
-  ni se actualiza automáticamente la versión de Spec Kit en esta configuración.
+  personalizaciones. Sigue la [guía oficial de actualización](https://github.github.io/spec-kit/upgrade.html),
+  trabaja en una rama con los cambios previos guardados y revisa el diff antes de integrar.
+  Con el CLI fijado, la actualización deliberada de la integración es:
+
+  ```bash
+  specify integration status --json
+  specify integration upgrade copilot --script ps --integration-options="--commands"
+  ```
+
+  El CLI usa los manifiestos para detectar modificaciones locales; si bloquea la
+  actualización, detente y revisa los conflictos, **no añadas `--force`**.
+  Conserva las traducciones, la constitución, las instrucciones y `specs/`.
+  Los archivos personalizados o recuperados pueden conservarse sin incorporar
+  cambios upstream: compara esas plantillas y scripts antes de dar por terminada
+  la actualización. No edites hashes de manifiestos para eludir esta protección.
+- Para cambiar de release del CLI, actualiza `.specify/requirements.txt` y el comando
+  `uv tool install` documentado juntos, revisa las notas oficiales y valida la
+  integración. La versión del CLI y la de los assets solo coinciden después de una
+  actualización efectiva de estos últimos; no cambies los metadatos para simularla.
 
 ## 🔒 Security Features (Training Implementation)
 

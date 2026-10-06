@@ -8,7 +8,8 @@
         "speckit.tasks": true,
         "speckit.analyze": true,
         "speckit.implement": true,
-        "speckit.converge": true
+        "speckit.converge": true,
+        "speckit.taskstoissues": true
     },
     "chat.tools.terminal.autoApprove": {
         ".specify/scripts/bash/": true,
