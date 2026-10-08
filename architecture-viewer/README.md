@@ -29,6 +29,42 @@ npm run preview    # sirve la compilación local, normalmente puerto 4173
 instalaciones reproducibles. El servidor es local por defecto; no es un servidor
 de producción. Para publicar, sirve el contenido estático de `dist/`.
 
+## Desarrollo guiado por especificaciones
+
+`architecture-viewer/` tiene su propia configuración de GitHub Spec Kit en
+`.specify/`, habilidades de Copilot en `.github/skills/` y especificaciones en
+`specs/`. Este setup describe únicamente el visor React/Vite. Es independiente
+del setup Spec Kit que permanece en la raíz del repositorio para ContosoDashboard;
+abre `architecture-viewer/` como carpeta del proyecto en VS Code para que Copilot
+use las habilidades locales.
+
+La inicialización del proyecto ya está incluida en el repositorio. Para usar las
+habilidades solo se requiere VS Code con GitHub Copilot Chat. No vuelvas a
+ejecutar `specify init` al clonar: esta configuración equivale a
+`specify init --here --integration copilot`, ya aplicado en esta carpeta. Si
+quieres crear un proyecto nuevo con el CLI, se requiere Python 3.11+ y `uv`:
+
+```sh
+uv tool install specify-cli
+specify init my-project --integration copilot
+```
+
+Desde Copilot Chat, usa las habilidades en este orden para una funcionalidad
+nueva:
+
+1. `/speckit-constitution` para crear o actualizar principios del proyecto.
+2. `/speckit-specify` para definir una funcionalidad en `specs/`.
+3. `/speckit-plan` para preparar su diseño técnico.
+4. `/speckit-tasks` para generar tareas accionables.
+5. `/speckit-implement` para implementar las tareas aprobadas.
+6. `/speckit-converge` para revisar el resultado frente a la especificación.
+
+`/speckit-clarify`, `/speckit-checklist` y `/speckit-analyze` están disponibles
+para revisión y calidad. Las especificaciones futuras deben mantener el alcance
+del visor: diagramas interactivos con datos estáticos locales, sin formularios,
+CRUD, backend ni operaciones reales. `specs/README.md` describe la organización
+de esos artefactos.
+
 ## Presentar y explorar
 
 - Usa la navegación lateral o las flechas para recorrer las cinco vistas.
